@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Módulo 6 — Celpe-Bras</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, Helvetica, sans-serif; background: #fff; color: #222; margin: 0 auto; padding: 16px; max-width: 640px; font-size: 18px; line-height: 1.5; }
+    .back-link { display: inline-block; margin-bottom: 14px; color: #8B1E24; text-decoration: none; font-weight: bold; font-size: 17px; }
+    h1 { color: #8B1E24; font-size: 25px; font-weight: normal; margin: 0 0 10px 0; }
+    h2 { color: #8B1E24; font-size: 21px; font-weight: normal; margin: 26px 0 10px 0; }
+    .audio-box { border: 1px solid #dddddd; padding: 12px; margin: 14px 0; background: #fafafa; }
+    .btn-audio { background: #fff; border: 1px solid #666; padding: 10px 14px; font-size: 16px; cursor: pointer; margin-right: 6px; }
+    .q-title { font-weight: bold; margin: 16px 0 6px 0; }
+    .opt-btn { display: block; width: 100%; text-align: left; background: #fff; border: 1px solid #bbbbbb; padding: 12px; margin-bottom: 6px; font-size: 17px; cursor: pointer; }
+    textarea { width: 100%; min-height: 140px; padding: 10px; font-size: 18px; font-family: inherit; border: 1px solid #999; }
+    .btn-send { background: #8B1E24; color: #fff; border: none; padding: 14px; font-size: 18px; width: 100%; cursor: pointer; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 16px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e5e5e5; vertical-align: top; }
+    tr:nth-child(odd) { background: #f4f4f4; }
+    th { width: 38%; }
+    .btn-forms { display: block; width: 100%; background: #222; color: #fff; padding: 14px; font-size: 17px; text-align: center; border: none; cursor: pointer; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html">&larr; Voltar aos Módulos</a>
+  <h1>6.1 Entrevista Oral Final</h1>
+  <p>Simulação da conversa final com o avaliador do Celpe-Bras:</p>
+
+  <div class="audio-box">
+    <p><strong>Áudio:</strong> "Muito bem! Chegamos ao final do curso. Conte para mim o que você mais gosta de fazer no Brasil e como foi estudar português."</p>
+    <button class="btn-audio" onclick="falar(0.95)">Ouvir normal</button>
+    <button class="btn-audio" onclick="falar(0.72)">Ouvir devagar</button>
+  </div>
+
+  <div class="q-title">1. O que você mais gosta no Brasil?</div>
+  <button class="opt-btn" onclick="marcar(1, '1 - Gosto muito das pessoas e do clima do Brasil.')">1 - Gosto muito das pessoas e do clima do Brasil.</button>
+  <button class="opt-btn" onclick="marcar(1, '1 - Gosto de passear com a minha família aqui.')">1 - Gosto de passear com a minha família aqui.</button>
+
+  <div class="q-title">2. Como você se sente falando português agora?</div>
+  <button class="opt-btn" onclick="marcar(2, '2 - Me sinto mais tranquila para conversar no dia a dia.')">2 - Me sinto mais tranquila para conversar no dia a dia.</button>
+  <button class="opt-btn" onclick="marcar(2, '2 - Já consigo entender melhor o que as pessoas falam.')">2 - Já consigo entender melhor o que as pessoas falam.</button>
+
+  <div class="q-title">Texto online (sua resposta):</div>
+  <textarea id="resp" placeholder="Toque nas opções acima ou escreva aqui..."></textarea>
+  <button class="btn-send" onclick="enviar()">Enviar resposta</button>
+
+  <h2>Status de envio</h2>
+  <table>
+    <tr><th>Status de envio</th><td id="stEnvio">Nenhum envio realizado</td></tr>
+    <tr><th>Status da avaliação</th><td id="stAval">Não há notas</td></tr>
+    <tr><th>Data de entrega</th><td>domingo, 31 jan 2027, 23:59</td></tr>
+    <tr><th>Última modificação</th><td id="stData">-</td></tr>
+    <tr><th>Texto online</th><td id="stTexto" style="white-space: pre-line;">-</td></tr>
+    <tr><th>Comentários sobre o envio</th><td id="stCom">Comentários (0)</td></tr>
+  </table>
+
+  <button class="btn-forms" onclick="enviarForms()">Copiar resposta e abrir Google Forms</button>
+
+  <script>
+    const FORMS_URL = "https://docs.google.com/forms/";
+    const AUDIO_TXT = "Muito bem! Chegamos ao final do curso. Conte para mim o que você mais gosta de fazer no Brasil e como foi estudar português.";
+    const STORAGE_KEY = "celpebras_mod_6";
+
+    function falar(vel) {
+      window.speechSynthesis.cancel();
+      const msg = new SpeechSynthesisUtterance(AUDIO_TXT);
+      msg.lang = "pt-BR"; msg.rate = vel;
+      window.speechSynthesis.speak(msg);
+    }
+    function marcar(num, texto) {
+      const box = document.getElementById("resp");
+      let linhas = box.value.split("\n").filter(l => l.trim() !== "");
+      const idx = linhas.findIndex(l => l.trim().startsWith(num + " -"));
+      if (idx >= 0) linhas[idx] = texto; else linhas.push(texto);
+      linhas.sort((a, b) => parseInt(a) - parseInt(b));
+      box.value = linhas.join("\n\n");
+    }
+    function enviar() {
+      const val = document.getElementById("resp").value.trim();
+      if (!val) return alert("Toque nas opções ou escreva sua resposta primeiro.");
+      const data = new Date().toLocaleString("pt-BR");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ val, data }));
+      carregar();
+    }
+    function carregar() {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      if (!saved) return;
+      document.getElementById("resp").value = saved.val;
+      document.getElementById("stEnvio").innerText = "Enviado para avaliação";
+      document.getElementById("stAval").innerText = "Aguardando revisão";
+      document.getElementById("stData").innerText = saved.data;
+      document.getElementById("stTexto").innerText = saved.val;
+      document.getElementById("stCom").innerText = "Comentários (1): Parabéns pela conclusão do curso!";
+    }
+    function enviarForms() {
+      const txt = "6.1 Entrevista Oral Final\n\n" + document.getElementById("resp").value;
+      navigator.clipboard && navigator.clipboard.writeText(txt);
+      alert("Resposta copiada! Agora cole no Google Forms.");
+      window.open(FORMS_URL, "_blank");
+    }
+    carregar();
+  </script>
+</body>
+</html>
